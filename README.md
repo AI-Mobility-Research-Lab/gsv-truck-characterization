@@ -110,19 +110,6 @@ gsv-truck-characterization/
 - **Citation Generator**: Ready-to-use BibTeX citation
 - **SEO Optimized**: Meta tags for better search engine visibility
 
-## 📄 Citation
-
-If you use this work, please cite:
-
-```bibtex
-@article{shang2024urban,
-  title={Exploring Drive-by Sensing and Deep Learning for Urban Truck Characterization using Google Street View Imagery},
-  author={Shang, Bo and Li, Yiqiao and Horbach, Blanche and Villon, Kevin},
-  journal={Transportation Research Part A},
-  year={2024},
-  publisher={Elsevier}
-}
-```
 
 ## 👥 Authors
 
