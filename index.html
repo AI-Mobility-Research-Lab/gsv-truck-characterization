@@ -1,0 +1,756 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Exploring Drive-by Sensing and Deep Learning for Urban Truck Characterization using Google Street View Imagery">
+    <meta name="keywords" content="Deep Learning, Object Detection, Urban Freight Data, Google Street View, Large-Scale Data Collection, Correlation Analysis, Emission Data, Depth Anything">
+    <meta name="author" content="Bo Shang, Yiqiao Li, Blanche Horbach, Kevin Villon">
+    
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="Urban Truck Characterization using GSV Imagery">
+    <meta property="og:description" content="Drive-by Sensing and Deep Learning for Urban Truck Distribution Analysis">
+    <meta property="og:image" content="./graphic_abstract.png">
+    
+    <!-- Twitter -->
+    <meta property="twitter:card" content="summary_large_image">
+    <meta property="twitter:title" content="Urban Truck Characterization using GSV Imagery">
+    <meta property="twitter:description" content="Drive-by Sensing and Deep Learning for Urban Truck Distribution Analysis">
+    <meta property="twitter:image" content="./graphic_abstract.png">
+    
+    <title>Urban Truck Characterization using GSV Imagery</title>
+    
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --primary-color: #2563eb;
+            --secondary-color: #64748b;
+            --accent-color: #f59e0b;
+            --text-dark: #1e293b;
+            --text-light: #64748b;
+            --bg-light: #f8fafc;
+            --border-color: #e2e8f0;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            line-height: 1.6;
+            color: var(--text-dark);
+            background-color: #ffffff;
+        }
+
+        .navbar {
+            background-color: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid var(--border-color);
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        }
+
+        .navbar-brand {
+            font-weight: 600;
+            color: var(--primary-color) !important;
+        }
+
+        .nav-link {
+            color: var(--text-dark) !important;
+            font-weight: 500;
+            transition: color 0.3s ease;
+        }
+
+        .nav-link:hover {
+            color: var(--primary-color) !important;
+        }
+
+        .hero-section {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 80px 0;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero-section::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.3);
+            z-index: 1;
+        }
+
+        .hero-content {
+            position: relative;
+            z-index: 2;
+        }
+
+        .hero-title {
+            font-size: 3rem;
+            font-weight: 700;
+            margin-bottom: 1.5rem;
+            line-height: 1.2;
+        }
+
+        .hero-subtitle {
+            font-size: 1.25rem;
+            font-weight: 300;
+            opacity: 0.9;
+            max-width: 800px;
+        }
+
+        .section {
+            padding: 80px 0;
+        }
+
+        .section-title {
+            font-size: 2.5rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+            color: var(--text-dark);
+        }
+
+        .section-subtitle {
+            font-size: 1.1rem;
+            color: var(--text-light);
+            margin-bottom: 3rem;
+            max-width: 600px;
+        }
+
+        .card {
+            border: none;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.07);
+            border-radius: 12px;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+        }
+
+        .btn-primary {
+            background-color: var(--primary-color);
+            border-color: var(--primary-color);
+            padding: 12px 24px;
+            font-weight: 500;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+        }
+
+        .btn-primary:hover {
+            background-color: #1d4ed8;
+            border-color: #1d4ed8;
+            transform: translateY(-2px);
+        }
+
+        .btn-outline-primary {
+            color: var(--primary-color);
+            border-color: var(--primary-color);
+            padding: 12px 24px;
+            font-weight: 500;
+            border-radius: 8px;
+        }
+
+        .authors {
+            margin-bottom: 2rem;
+        }
+
+        .author {
+            display: inline-block;
+            margin-right: 1.5rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .author-name {
+            font-weight: 500;
+            color: var(--text-dark);
+        }
+
+        .author-affiliation {
+            font-size: 0.9rem;
+            color: var(--text-light);
+        }
+
+        .highlights {
+            background-color: var(--bg-light);
+            border-left: 4px solid var(--primary-color);
+            padding: 1.5rem;
+            border-radius: 0 8px 8px 0;
+        }
+
+        .highlight-item {
+            margin-bottom: 1rem;
+            padding-left: 1rem;
+            position: relative;
+        }
+
+        .highlight-item::before {
+            content: '▶';
+            position: absolute;
+            left: 0;
+            color: var(--primary-color);
+            font-size: 0.8rem;
+        }
+
+        .image-gallery {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            margin-top: 2rem;
+        }
+
+        .image-item {
+            text-align: center;
+        }
+
+        .image-item img {
+            width: 100%;
+            height: auto;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s ease;
+        }
+
+        .image-item img:hover {
+            transform: scale(1.02);
+        }
+
+        .image-caption {
+            margin-top: 1rem;
+            font-size: 0.9rem;
+            color: var(--text-light);
+            font-style: italic;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 2rem;
+            margin-top: 3rem;
+        }
+
+        .stat-item {
+            text-align: center;
+            padding: 2rem;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+        }
+
+        .stat-number {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: var(--primary-color);
+            display: block;
+        }
+
+        .stat-label {
+            font-size: 0.9rem;
+            color: var(--text-light);
+            margin-top: 0.5rem;
+        }
+
+        .methodology-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 2rem;
+            margin-top: 3rem;
+        }
+
+        .method-card {
+            background: white;
+            padding: 2rem;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+            transition: transform 0.3s ease;
+        }
+
+        .method-card:hover {
+            transform: translateY(-4px);
+        }
+
+        .method-icon {
+            font-size: 2.5rem;
+            color: var(--primary-color);
+            margin-bottom: 1rem;
+        }
+
+        .method-title {
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+        }
+
+        .footer {
+            background-color: var(--text-dark);
+            color: white;
+            padding: 3rem 0;
+            margin-top: 4rem;
+        }
+
+        .footer h6 {
+            color: var(--accent-color);
+            margin-bottom: 1rem;
+        }
+
+        .footer a {
+            color: #cbd5e1;
+            text-decoration: none;
+            transition: color 0.3s ease;
+        }
+
+        .footer a:hover {
+            color: white;
+        }
+
+        .code-block {
+            background-color: #1e293b;
+            color: #cbd5e1;
+            padding: 1.5rem;
+            border-radius: 8px;
+            font-family: 'Monaco', 'Consolas', monospace;
+            font-size: 0.9rem;
+            overflow-x: auto;
+        }
+
+        @media (max-width: 768px) {
+            .hero-title {
+                font-size: 2rem;
+            }
+            
+            .section-title {
+                font-size: 2rem;
+            }
+            
+            .hero-section {
+                padding: 60px 0;
+            }
+            
+            .section {
+                padding: 60px 0;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-light fixed-top">
+        <div class="container">
+            <a class="navbar-brand" href="#home">
+                <i class="fas fa-truck"></i> Urban Truck Analysis
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="#home">Home</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#abstract">Abstract</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#methodology">Methodology</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#results">Results</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#downloads">Downloads</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section id="home" class="hero-section">
+        <div class="container">
+            <div class="row justify-content-center text-center hero-content">
+                <div class="col-lg-10">
+                    <h1 class="hero-title">Exploring Drive-by Sensing and Deep Learning for Urban Truck Characterization</h1>
+                    <p class="hero-subtitle">Using Google Street View Imagery for Large-Scale Urban Freight Monitoring</p>
+                    
+                    <div class="authors mt-4">
+                        <div class="author">
+                            <div class="author-name">Bo Shang</div>
+                            <div class="author-affiliation">The City College of New York, CUNY</div>
+                        </div>
+                        <div class="author">
+                            <div class="author-name">Yiqiao Li</div>
+                            <div class="author-affiliation">The City College of New York, CUNY</div>
+                        </div>
+                        <div class="author">
+                            <div class="author-name">Blanche Horbach</div>
+                            <div class="author-affiliation">The City College of New York, CUNY</div>
+                        </div>
+                        <div class="author">
+                            <div class="author-name">Kevin Villon</div>
+                            <div class="author-affiliation">The City College of New York, CUNY</div>
+                        </div>
+                    </div>
+                    
+                    <div class="mt-4">
+                        <a href="#abstract" class="btn btn-primary me-3">
+                            <i class="fas fa-book-open"></i> Read Paper
+                        </a>
+                        <a href="#downloads" class="btn btn-outline-light">
+                            <i class="fas fa-download"></i> Downloads
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Abstract Section -->
+    <section id="abstract" class="section">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-8 mx-auto">
+                    <h2 class="section-title text-center">Abstract</h2>
+                    <p class="section-subtitle text-center">Understanding urban truck distribution through innovative drive-by sensing technology</p>
+                    
+                    <div class="card">
+                        <div class="card-body p-4">
+                            <p class="mb-4">
+                                Trucks are essential to urban economies through facilitating the movement of goods and services, but their presence can disproportionately affects urban infrastructure, traffic congestion, air quality, and noise pollution. 
+                                Effective urban freight planning, policy making and on-road emission estimation require a comprehensive understanding of urban truck distribution by their classes.
+                            </p>
+                            <p class="mb-4">
+                                This study explores the use of Drive-by Sensing technologies through Google Street View imagery (GSV), combined with advanced computer vision and AI methods to generate fine-grained truck classification data at scale in urban area. 
+                                The overall framework consists of three main components: first, a customized YOLO model for truck detection and classification from Google Street View imagery; second, DepthAnything integration for RGB-based depth estimation to filter distant and less visible objects; third, efficientNet for fine-grained truck classification; and fourth, correlation analysis between detected truck distribution patterns and environmental data.
+                            </p>
+                            <p>
+                                The data analysis results suggest that trucks may contribute approximately <strong>16%</strong> to the measured PM2.5 emissions in the Manhattan districts studied, demonstrating the potential for actionable insights into emission trends influenced by trucks through our drive-by sensing approach.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Research Highlights -->
+    <section class="section bg-light">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-10 mx-auto">
+                    <h2 class="section-title text-center">Research Highlights</h2>
+                    <div class="highlights">
+                        <div class="highlight-item">
+                            This study pioneers the integration of <strong>drive-by sensing</strong> and deep learning to characterize and analyze urban truck distribution at <strong>large scale</strong>, significantly improving spatial resolution of data collection over traditional traffic monitoring methods.
+                        </div>
+                        <div class="highlight-item">
+                            A novel integration of <strong>DepthAnything</strong> and customized YOLO model enhances object detection by filtering out distant and less visible vehicles based on RGB-inferred depth, improving detection accuracy and reducing overcounting.
+                        </div>
+                        <div class="highlight-item">
+                            A semi-automated data augmentation approach using <strong>Claude-3.7-sonnet</strong> significantly improved fine-grained classification of underrepresented truck types—boosting the recall of <em>Specialty Services</em> trucks from <strong>17% to 50%</strong> with minimal human intervention.
+                        </div>
+                        <div class="highlight-item">
+                            Correlation analysis between GSV-derived truck density and public air quality data (PM2.5) in Manhattan demonstrates the potential of vision-based monitoring to support environmental and transportation policy-making.
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Methodology Section -->
+    <section id="methodology" class="section">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-12">
+                    <h2 class="section-title text-center">Methodology</h2>
+                    <p class="section-subtitle text-center">Our comprehensive framework for urban truck detection and analysis</p>
+                    
+                    <div class="row justify-content-center mb-5">
+                        <div class="col-lg-10">
+                            <div class="image-item">
+                                <img src="./overall_architecture.png" alt="Overall Architecture" class="img-fluid">
+                                <p class="image-caption">Overall architecture of the urban truck detection framework, showing the model development pipeline and implementation components.</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="methodology-grid">
+                        <div class="method-card">
+                            <div class="method-icon">
+                                <i class="fas fa-eye"></i>
+                            </div>
+                            <h4 class="method-title">Drive-by Sensing</h4>
+                            <p>Utilizing Google Street View panoramic imagery to collect urban truck data at unprecedented scale and spatial resolution.</p>
+                        </div>
+                        
+                        <div class="method-card">
+                            <div class="method-icon">
+                                <i class="fas fa-search"></i>
+                            </div>
+                            <h4 class="method-title">YOLO Detection</h4>
+                            <p>Customized YOLO model for accurate truck detection and initial classification from street-level imagery.</p>
+                        </div>
+                        
+                        <div class="method-card">
+                            <div class="method-icon">
+                                <i class="fas fa-cube"></i>
+                            </div>
+                            <h4 class="method-title">DepthAnything Integration</h4>
+                            <p>RGB-based depth estimation to filter distant objects and improve detection accuracy in urban environments.</p>
+                        </div>
+                        
+                        <div class="method-card">
+                            <div class="method-icon">
+                                <i class="fas fa-brain"></i>
+                            </div>
+                            <h4 class="method-title">EfficientNet Classification</h4>
+                            <p>Fine-grained truck classification into 10 detailed categories including delivery vehicles, construction trucks, and specialty services.</p>
+                        </div>
+                        
+                        <div class="method-card">
+                            <div class="method-icon">
+                                <i class="fas fa-chart-line"></i>
+                            </div>
+                            <h4 class="method-title">Environmental Correlation</h4>
+                            <p>Correlation analysis between truck density and air quality data to demonstrate environmental impact assessment capabilities.</p>
+                        </div>
+                        
+                        <div class="method-card">
+                            <div class="method-icon">
+                                <i class="fas fa-robot"></i>
+                            </div>
+                            <h4 class="method-title">AI-Assisted Augmentation</h4>
+                            <p>Semi-automated data augmentation using Claude-3.7-sonnet to improve classification of underrepresented truck types.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Results Section -->
+    <section id="results" class="section bg-light">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-12">
+                    <h2 class="section-title text-center">Results & Findings</h2>
+                    <p class="section-subtitle text-center">Comprehensive evaluation of our urban truck characterization framework</p>
+                    
+                    <!-- Key Statistics -->
+                    <div class="stats-grid">
+                        <div class="stat-item">
+                            <span class="stat-number">22,589</span>
+                            <div class="stat-label">GSV Panoramic Images</div>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-number">10,000</span>
+                            <div class="stat-label">Manually Annotated Images</div>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-number">16%</span>
+                            <div class="stat-label">Estimated Truck Contribution to PM2.5</div>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-number">50%</span>
+                            <div class="stat-label">Specialty Services Recall Improvement</div>
+                        </div>
+                    </div>
+                    
+                    <!-- Results Gallery -->
+                    <div class="image-gallery mt-5">
+                        <div class="image-item">
+                            <img src="./class_distribution_horizontal.png" alt="Class Distribution">
+                            <p class="image-caption">Distribution of truck categories showing substantial class imbalance in the dataset</p>
+                        </div>
+                        
+                        <div class="image-item">
+                            <img src="./confusion_matrix_normalized.png" alt="Confusion Matrix">
+                            <p class="image-caption">Normalized confusion matrix showing classification performance across different truck types</p>
+                        </div>
+                        
+                        <div class="image-item">
+                            <img src="./classification_metrics_efficientnet_f1_plot.png" alt="F1 Scores">
+                            <p class="image-caption">F1 scores for different truck categories using EfficientNet classification</p>
+                        </div>
+                        
+                        <div class="image-item">
+                            <img src="./model_improvement_comparison.png" alt="Model Comparison">
+                            <p class="image-caption">Comparison of model performance improvements through our methodology</p>
+                        </div>
+                        
+                        <div class="image-item">
+                            <img src="./Strip_image_depthAnything_.png" alt="Depth Analysis">
+                            <p class="image-caption">DepthAnything integration for filtering distant objects in urban scenes</p>
+                        </div>
+                        
+                        <div class="image-item">
+                            <img src="./truckpm25.png" alt="Environmental Correlation">
+                            <p class="image-caption">Correlation analysis between truck density and PM2.5 emissions in Manhattan</p>
+                        </div>
+                    </div>
+                    
+                    <!-- Perspective Analysis -->
+                    <div class="row mt-5">
+                        <div class="col-lg-12">
+                            <h3 class="text-center mb-4">Multi-Perspective Analysis</h3>
+                            <div class="image-gallery">
+                                <div class="image-item">
+                                    <img src="./Individual Four Perspectives_Montage.png" alt="Four Perspectives">
+                                    <p class="image-caption">Individual four perspectives extracted from panoramic GSV imagery</p>
+                                </div>
+                                
+                                <div class="image-item">
+                                    <img src="./Merged Four Perspectives Annotated Image.png" alt="Merged Perspectives">
+                                    <p class="image-caption">Merged four perspectives with truck detection annotations</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Downloads Section -->
+    <section id="downloads" class="section">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-8 mx-auto text-center">
+                    <h2 class="section-title">Downloads & Resources</h2>
+                    <p class="section-subtitle">Access our paper, code, and supplementary materials</p>
+                    
+                    <div class="row">
+                        <div class="col-md-6 mb-4">
+                            <div class="card h-100">
+                                <div class="card-body text-center">
+                                    <i class="fas fa-file-pdf fa-3x text-danger mb-3"></i>
+                                    <h5 class="card-title">Paper (PDF)</h5>
+                                    <p class="card-text">Full research paper with detailed methodology and results</p>
+                                    <a href="./elsarticle-template-num.pdf" class="btn btn-primary" download>
+                                        <i class="fas fa-download"></i> Download PDF
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-6 mb-4">
+                            <div class="card h-100">
+                                <div class="card-body text-center">
+                                    <i class="fab fa-github fa-3x text-dark mb-3"></i>
+                                    <h5 class="card-title">Source Code</h5>
+                                    <p class="card-text">Implementation code and scripts for reproduction</p>
+                                    <a href="https://github.com/AI-Mobility-Research-Lab" class="btn btn-outline-primary" target="_blank">
+                                        <i class="fab fa-github"></i> View on GitHub
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="mt-4">
+                        <h4>Citation</h4>
+                        <div class="code-block text-start">
+@article{shang2024urban,
+  title={Exploring Drive-by Sensing and Deep Learning for Urban Truck Characterization using Google Street View Imagery},
+  author={Shang, Bo and Li, Yiqiao and Horbach, Blanche and Villon, Kevin},
+  journal={Transportation Research Part A},
+  year={2024},
+  publisher={Elsevier}
+}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-4 mb-4">
+                    <h6>Research Team</h6>
+                    <p class="mb-2"><strong>AI Mobility Research Lab</strong></p>
+                    <p>The City College of New York, CUNY<br>
+                    160 Convent Avenue<br>
+                    New York, NY 10031</p>
+                </div>
+                
+                <div class="col-lg-4 mb-4">
+                    <h6>Links</h6>
+                    <ul class="list-unstyled">
+                        <li><a href="https://github.com/AI-Mobility-Research-Lab">GitHub Repository</a></li>
+                        <li><a href="#abstract">Research Paper</a></li>
+                        <li><a href="https://www.ccny.cuny.edu/">CCNY</a></li>
+                    </ul>
+                </div>
+                
+                <div class="col-lg-4 mb-4">
+                    <h6>Contact</h6>
+                    <p>For questions about this research:</p>
+                    <p><strong>Yiqiao Li</strong> (Corresponding Author)<br>
+                    <a href="mailto:yli4@ccny.cuny.edu">yli4@ccny.cuny.edu</a></p>
+                </div>
+            </div>
+            
+            <hr class="my-4">
+            
+            <div class="row align-items-center">
+                <div class="col-lg-6">
+                    <p class="mb-0">&copy; 2024 AI Mobility Research Lab. All rights reserved.</p>
+                </div>
+                <div class="col-lg-6 text-lg-end">
+                    <p class="mb-0">
+                        <small>Keywords: Deep Learning • Object Detection • Urban Freight Data • Google Street View • Large-Scale Data Collection</small>
+                    </p>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <!-- Smooth scrolling -->
+    <script>
+        // Smooth scrolling for navigation links
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
+                }
+            });
+        });
+
+        // Navbar background on scroll
+        window.addEventListener('scroll', function() {
+            const navbar = document.querySelector('.navbar');
+            if (window.scrollY > 50) {
+                navbar.style.backgroundColor = 'rgba(255, 255, 255, 0.98)';
+            } else {
+                navbar.style.backgroundColor = 'rgba(255, 255, 255, 0.95)';
+            }
+        });
+    </script>
+</body>
+</html>
